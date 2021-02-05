@@ -19,6 +19,7 @@ import time
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill, intent_handler
 
+
 class AllRecipes(MycroftSkill):
     def __init__(self):
         MycroftSkill.__init__(self)
@@ -31,6 +32,10 @@ class AllRecipes(MycroftSkill):
         self.register_entity_file("title.entity")
         self.process = None        
         self.play_list = {
+            'simple teriyaki sauce': join(abspath(dirname(__file__)), 'recipes', 'simple-teriyaki-sauce'),
+            'kung pao chicken': join(abspath(dirname(__file__)), 'recipes', 'kung-pao-chicken'),
+            'sweet and sour chicken i': join(abspath(dirname(__file__)), 'recipes', 'sweet-and-sour-chicken-i'),
+            'chinese barbeque pork char siu': join(abspath(dirname(__file__)), 'recipes', 'chinese-barbeque-pork-char-siu'),
             'tiramisu layer cake': join(abspath(dirname(__file__)), 'recipes', 'tiramisu-layer-cake'),
             'pork chops italiano': join(abspath(dirname(__file__)), 'recipes', 'pork-chops-italiano'),
             'restaurant style beef and broccoli': join(abspath(dirname(__file__)), 'recipes', 'restaurant-style-beef-and-broccoli'),
@@ -82,14 +87,15 @@ class AllRecipes(MycroftSkill):
         #self.gui.show_text(path, override_idle=None)
         TITLE_LI = "SEARCH RESULTS"
         self.gui.clear()
-        LOGO = '/opt/mycroft-core/skills/all-recipes-skill/allrecipes.jpg'
+        LOGO = ("/opt/mycroft/skills/all-recipes-skill/bash/" + self.lang +  "/pics/AR.png")
         LOGO = LOGO.strip()
-        self.gui.show_image(LOGO)       
+        self.gui.show_image(LOGO)  
+        time.sleep(1)
         self.gui['title'] = TITLE_LI  
         self.gui['reclist'] = path
         self.gui['summary'] = ""
         #self.gui.show_text(summary)
-        self.gui.show_page("recipe.qml", override_idle=120)
+        self.gui.show_page("recipe.qml", override_idle=600)
         #if self.ask_yesno("which.recipe.number") == "number one":
         self.is_reading = True              
         self.is_paused = True
@@ -109,7 +115,7 @@ class AllRecipes(MycroftSkill):
                else: 
                     if self.is_paused is True:   
                        #self.speak(path, wait=True)
-                       for x in range(5):
+                       for x in range(10):
                            self.is_reading = False
                            #time.sleep(6)
                            if self.is_continue is True:
@@ -257,8 +263,8 @@ class AllRecipes(MycroftSkill):
            self.speak(NUMBER)  
            self.is_choice = NUMBER
            #os.system("echo " + NUMBER)
-           Recipe_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./process_recipe3 " + NUMBER).read()
-           TITLE_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./TITLE " + NUMBER).read()
+           Recipe_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./process_recipe3 " + NUMBER).read()
+           TITLE_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./TITLE " + NUMBER).read()
            PIC_OL = os.popen("cat PIC_URL ").read()
            self.gui.show_image(PIC_OL)
            #print(Recipe_OL)
@@ -282,7 +288,7 @@ class AllRecipes(MycroftSkill):
            path = filepath.read()
 
 ########## FRACTION COINVERSION ############
-           Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./FRAC " + path).read()
+           Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./FRAC " + path).read()
            file0 = open("recipe.conv","w")
            file0.write(Recipe_CONV)
            file0.close() 
@@ -312,11 +318,13 @@ class AllRecipes(MycroftSkill):
 ######### get online recipes ###########       
     @intent_file_handler('online.getrecipe.intent')
     def handle_online_getrecipe(self, message):
+        os.popen("skills/Energy-Monitor/./GUI.sh ")
         #self.is_MUTE = False
         self.speak_dialog('online.getrecipes')
+        time.sleep(5)
         #wait_while_speaking()
         INPUT = message.data.get('group')
-        os.system("$HOME/mycroft-core/skills/all-recipes-skill/./online " + INPUT) 
+        os.system("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./online " + INPUT) 
         #time.sleep(1)
         filepath = open("tmp_recipe","r")  
         path = filepath.read()
@@ -324,14 +332,16 @@ class AllRecipes(MycroftSkill):
         self.process = None
         TITLE_LI = "SEARCH RESULTS"
         self.gui.clear()
-        LOGO = "/opt/mycroft-core/skills/all-recipes-skill/allrecipes.jpg"
+        LOGO = ("/opt/mycroft/skills/all-recipes-skill/bash/" + self.lang + "/pics/AR.png")
         LOGO = LOGO.strip()
+        os.system("echo " + LOGO)
         self.gui.show_image(LOGO)
+        time.sleep(1)
         self.gui['title'] = TITLE_LI
         self.gui['reclist'] = path
         self.gui['summary'] = ""
         #self.gui.show_text(summary)
-        self.gui.show_page("recipe.qml", override_idle=120)
+        self.gui.show_page("recipe.qml", override_idle=600)
         #if self.ask_yesno("which.recipe.number") == "number one":
         self.is_reading = True              
         self.is_paused = True
@@ -349,7 +359,7 @@ class AllRecipes(MycroftSkill):
                else: 
                     if self.is_paused is True:   
                        #self.speak(path, wait=True)
-                       for x in range(5):
+                       for x in range(10):
                            #time.sleep(6)
                            if self.is_continue is True:
                                   self.is_continue = False
@@ -497,9 +507,10 @@ class AllRecipes(MycroftSkill):
         if self.is_recipe is True:
            self.speak(NUMBER) 
            self.is_choice = NUMBER
-           #os.system("echo " + NUMBER)
-           Recipe_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./process_recipe3 " + NUMBER).read()
-           TITLE_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./TITLE " + NUMBER).read()
+           LANG = self.lang
+           os.system("echo " + LANG)
+           Recipe_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./process_recipe3 " + NUMBER).read()
+           TITLE_OL = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./TITLE " + NUMBER).read()
            PIC_OL = os.popen("cat PIC_URL ").read()
            self.gui.show_image(PIC_OL)
 
@@ -522,7 +533,7 @@ class AllRecipes(MycroftSkill):
            path = filepath.read()
            
 ########## FRACTION COINVERSION ############
-           Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./FRAC " + path).read()
+           Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./FRAC " + path).read()
            file0 = open("recipe.conv","w")
            file0.write(Recipe_CONV)
            file0.close() 
@@ -563,6 +574,7 @@ class AllRecipes(MycroftSkill):
     #Play random recipe from list
     @intent_file_handler('recipes.pick.intent')
     def handle_recipes_pick(self, message):
+        os.popen("skills/Energy-Monitor/./GUI.sh ")
         wait_while_speaking()
         self.speak_dialog('recipes.pick')
         recipe_file = list(self.play_list.values())
@@ -577,13 +589,13 @@ class AllRecipes(MycroftSkill):
         recipe = open(filepath,"r")  
         recipe = recipe.read()
 
-        TMP = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./FILE " + filepath).read()
+        TMP = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./FILE " + filepath).read()
         IMAGE = ("/opt/mycroft/skills/all-recipes-skill/recipes/pics/" + TMP  )
         IMAGE = IMAGE.strip()
         print(IMAGE)
         
 ########## FRACTION COINVERSION ############
-        Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./FRAC " + filepath).read()
+        Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./FRAC " + filepath).read()
         file0 = open("recipe.conv","w")
         file0.write(Recipe_CONV)
         file0.close() 
@@ -612,6 +624,7 @@ class AllRecipes(MycroftSkill):
     #Pick recipe by title
     @intent_file_handler('pick.recipe.intent')
     def handle_pick_recipe(self, message):
+        os.popen("skills/Energy-Monitor/./GUI.sh ")
         self.speak_dialog('pick.recipes')
         wait_while_speaking()
         
@@ -627,13 +640,13 @@ class AllRecipes(MycroftSkill):
             recipe = open(filepath,"r")  
             recipe = recipe.read() 
  
-            TMP = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./FILE " + filepath).read()
+            TMP = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./FILE " + filepath).read()
             IMAGE = ("/opt/mycroft/skills/all-recipes-skill/recipes/pics/" + TMP  )
             IMAGE = IMAGE.strip()
             print(IMAGE)
             
 ########## FRACTION COINVERSION ############
-            Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/./FRAC " + filepath).read()
+            Recipe_CONV = os.popen("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./FRAC " + filepath).read()
             file0 = open("recipe.conv","w")
             file0.write(Recipe_CONV)
             file0.close() 
@@ -645,7 +658,7 @@ class AllRecipes(MycroftSkill):
  #############################################                
             
             self.gui.show_image(IMAGE)
-            time.sleep(1)
+            time.sleep(3)
             self.is_reading = True 
             with open(path) as fp:  
                   for cnt, line in enumerate(fp):
@@ -666,6 +679,7 @@ class AllRecipes(MycroftSkill):
     #List recipes in library
     @intent_file_handler('list.recipes.intent')
     def handle_list_recipes(self, message):
+        os.popen("skills/Energy-Monitor/./GUI.sh ")
         wait_while_speaking()
         recipe_list = list(self.play_list.keys())
         print(recipe_list)
@@ -677,14 +691,16 @@ class AllRecipes(MycroftSkill):
         #file1.write(recipe)
         #file1.close()   
         #self.is_MUTE = True  
-        LOGO = "/opt/mycroft-core/skills/all-recipes-skill/allrecipes.jpg"
+        LOGO = ("/opt/mycroft/skills/all-recipes-skill/bash/" + self.lang +  "/pics/AR.png")
         LOGO = LOGO.strip()
         self.gui.show_image(LOGO)
+        time.sleep(3)
         self.gui['title'] = "FAVORITES"
         self.gui['reclist'] = recipe
         self.gui['summary'] = " "
         self.gui.show_page("recipe.qml", override_idle=600)
-        self.speak_dialog('list.recipes', data=dict(recipes=recipe_list))
+        #self.speak_dialog('list.recipes', data=dict(recipes=recipe_list))
+
     
     def stop(self):
         if self.process and self.process.poll() is None:
@@ -697,7 +713,7 @@ class AllRecipes(MycroftSkill):
         self.speak_dialog('pick.getrecipes')
         wait_while_speaking()
         NUMBER  = self.is_choice 
-        os.system("$HOME/mycroft-core/skills/all-recipes-skill/./recipe " + NUMBER) 
+        os.system("$HOME/mycroft-core/skills/all-recipes-skill/bash/" + self.lang +  "/./recipe " + NUMBER) 
         #PIC_OL = os.popen("cat PIC_URL ").read()
 
 
